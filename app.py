@@ -1,17 +1,15 @@
 import os
 import re
-
 import bleach
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, Markup
 import google.generativeai as genai
 
 load_dotenv()
-
 app = Flask(__name__)
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel(os.getenv("GEMINI_MODEL", "gemini-1.5-flash"))
 
 SYSTEM_INSTRUCTION = """너는 정확하고 깊이 있는 성경 신학 해설가이다.
 
@@ -227,13 +225,12 @@ def get_model(max_output_tokens: int | None = None):
     )
 
 
-@app.route("/")
+@app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template('index.html')
 
-
-@app.route("/api/summarize", methods=["POST"])
-def summarize():
+@app.route('/get_summary', methods=['POST'])
+def get_summary():
     data = request.get_json(silent=True) or {}
     book = (data.get("book") or "").strip()
     chapter = data.get("chapter")
@@ -278,7 +275,7 @@ def summarize():
         sections = parse_sections(text)
         
     return jsonify({
-        "summary": str(Markup(text)),
+        "summary": str(Markup(text)), 
         "sections": sections,
         "book": book,
         "chapter": chapter_num,
@@ -289,5 +286,5 @@ def summarize():
         return jsonify({"error": f"Gemini API 오류: {e}"}), 502
 
 
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+if __name__ == '__main__':
+    app.run()
