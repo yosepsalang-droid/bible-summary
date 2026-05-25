@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#f5f0e8">
+  <meta name="description" content="성경 66권 장별 요약 - 모바일 최적화">
+  <title>성경 요약</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <button type="button" class="btn-back" id="btnBack" aria-label="뒤로" hidden>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <h1 class="header-title" id="headerTitle">성경 요약</h1>
+      <div class="header-spacer" aria-hidden="true"></div>
+    </header>
+
+    <main class="main">
+      <!-- 권 목록 -->
+      <section class="view view-active" id="viewBooks" aria-label="성경 권 목록">
+        <p class="section-label">구약 (39권)</p>
+        <div class="grid" id="gridOld"></div>
+        <p class="section-label section-label--nt">신약 (27권)</p>
+        <div class="grid" id="gridNew"></div>
+      </section>
+
+      <!-- 장 목록 -->
+      <section class="view" id="viewChapters" aria-label="장 목록" hidden>
+        <p class="book-subtitle" id="bookSubtitle"></p>
+        <div class="grid grid--chapters" id="gridChapters"></div>
+      </section>
+
+      <!-- 요약 -->
+      <section class="view" id="viewSummary" aria-label="장 요약" hidden>
+        <div class="summary-meta" id="summaryMeta"></div>
+        <div class="summary-body summary-cards" id="summaryBody"></div>
+      </section>
+    </main>
+
+    <div class="loading-overlay" id="loadingOverlay" hidden aria-live="polite">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">요약을 생성하고 있습니다…</p>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/bible-data.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
