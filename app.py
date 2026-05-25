@@ -276,12 +276,13 @@ def summarize():
             return jsonify({"error": "요약을 생성하지 못했습니다."}), 502
 
         sections = parse_sections(text)
-        return jsonify({
-            "summary": str(Markup(text)),
-            "sections": sections,
-            "book": book,
-            "chapter": chapter_num,
-        })
+        
+    return jsonify({
+        "summary": str(Markup(text)),
+        "sections": sections,
+        "book": book,
+        "chapter": chapter_num,
+    })
     except ValueError as e:
         return jsonify({"error": str(e)}), 500
     except Exception as e:
