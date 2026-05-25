@@ -277,7 +277,7 @@ def summarize():
 
         sections = parse_sections(text)
         return jsonify({
-            "summary": text,
+            "summary": str(Markup(text)),
             "sections": sections,
             "book": book,
             "chapter": chapter_num,
