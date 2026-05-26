@@ -169,14 +169,27 @@ def index():
 
 @app.route('/get_summary', methods=['POST'])
 def get_summary():
-    data = request.json
-    book = data.get("book")
-    chapter = data.get("chapter")
-    prompt = f"『{book}』 {chapter}장의 내용을 4가지 항목(📝, 🌍, 💡, 📍)으로 깊이 있게 해설해줘."
-    response = model.generate_content(prompt)
-
-    # 결과 반환
-    return jsonify({"content": sanitize_section_html(response.text)})
+    try:
+        data = request.json
+        # book과 chapter 정보를 받아옵니다.
+        book = data.get("book", "")
+        chapter = data.get("chapter", "")
+        
+        # 프롬프트를 좀 더 간결하고 정확하게 수정하여 응답 속도를 높입니다.
+        prompt = f"『{book}』 {chapter}장을 해설해줘. 📝표, 🌍역사, 💡히브리어, 📍지역 순서로 HTML로만 작성해."
+        
+        # 모델 호출
+        response = model.generate_content(prompt)
+        
+        if not response.text:
+            return jsonify({"error": "답변 생성 실패"}), 500
+            
+        return jsonify({"content": sanitize_section_html(response.text)})
+        
+    except Exception as e:
+        # 이 로그가 Render의 [Logs] 탭에 출력되어 정확한 원인을 알려줍니다.
+        print(f"상세 에러 내용: {str(e)}") 
+        return jsonify({"error": "제미나이 통신 시간 초과 또는 오류 발생"}), 500
 
 def sanitize_section_html(body: str) -> str:
     body = body.strip()
