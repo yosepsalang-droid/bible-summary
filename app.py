@@ -2,7 +2,8 @@ import os
 import re
 import bleach
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request, Markup
+from flask import Flask, jsonify, render_template, request
+from markupsafe import Markup
 import google.generativeai as genai
 
 load_dotenv()
