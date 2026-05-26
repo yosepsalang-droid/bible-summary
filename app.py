@@ -190,7 +190,6 @@ def get_summary():
         # 이 로그가 Render의 [Logs] 탭에 출력되어 정확한 원인을 알려줍니다.
         print(f"상세 에러 내용: {str(e)}") 
         return jsonify({"error": "제미나이 통신 시간 초과 또는 오류 발생"}), 500
-
 def sanitize_section_html(body: str) -> str:
     body = body.strip()
     body = re.sub(r'^\s*```html\s*', '', body, flags=re.I)
