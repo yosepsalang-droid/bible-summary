@@ -234,7 +234,6 @@ def get_summary():
     data = request.get_json()
     book = data.get('book')
     chapter_num = data.get('chapter')
-
     if not book:
         return jsonify({"error": "성경 권명이 필요합니다."}), 400
 
@@ -256,7 +255,7 @@ def get_summary():
 
   try:
     
-        prompt = f"성경 {book} {chapter_num}장의 내용을 핵심 위주로 요약해줘. 아버님이 읽기 편하게 가독성이 좋은 HTML 태그(<p>, <ul>, <li> 등)나 표(<table>) 형식으로 작성해줘."
+       prompt = f"성경 {book} {chapter_num}장의 내용을 아버님이 읽기 편하게 가독성이 좋은 HTML 태그(<p>, <ul>, <li> 등)나 표(<table>) 형식으로 작성해서 핵심 위주로 요약해줘."
         response = model.generate_content(prompt)
         text = response.text
         sections = []
