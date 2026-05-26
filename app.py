@@ -9,7 +9,7 @@ load_dotenv()
 app = Flask(__name__)
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel(os.getenv("GEMINI_MODEL", "gemini-1.5-flash"))
+model = genai.GenerativeModel(os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
 
 SYSTEM_INSTRUCTION = """너는 정확하고 깊이 있는 성경 신학 해설가이다.
 
