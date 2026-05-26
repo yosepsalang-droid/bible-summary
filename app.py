@@ -9,7 +9,7 @@ load_dotenv()
 app = Flask(__name__)
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel(os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
+model = genai.GenerativeModel(os.getenv("GEMINI_MODEL", "gemini-1.5-flash"))
 
 SYSTEM_INSTRUCTION = """너는 정확하고 깊이 있는 성경 신학 해설가이다.
 
@@ -254,10 +254,12 @@ def get_summary():
         f"[필수] 모든 문장과 표·리스트 항목은 중간에 끊지 말고 마침표(.)로 완결하라."
     )
 
-    try:
-        model = get_model()
-        response = model.generate_content(user_prompt)
-        text = extract_response_text(response)
+  try:
+    
+        prompt = f"성경 {book} {chapter_num}장의 내용을 핵심 위주로 요약해줘. 아버님이 읽기 편하게 가독성이 좋은 HTML 태그(<p>, <ul>, <li> 등)나 표(<table>) 형식으로 작성해줘."
+        response = model.generate_content(prompt)
+        text = response.text
+        sections = []
 
         if is_response_truncated(response) or is_text_incomplete(text):
             retry_prompt = (
@@ -274,16 +276,17 @@ def get_summary():
 
         sections = parse_sections(text)
         
-    return jsonify({
-        "summary": str(Markup(text)),
-        "sections": sections,
-        "book": book,
-        "chapter": chapter_num,
-    })
+   return jsonify({
+            "summary": str(Markup(text)),
+            "sections": sections,
+            "book": book,
+            "chapter": chapter_num,
+        })
     except ValueError as e:
         return jsonify({"error": str(e)}), 500
-    except Exception as e:
-        return jsonify({"error": f"Gemini API 오류: {e}"}), 502
+    xcept Exception as e:
+       
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
