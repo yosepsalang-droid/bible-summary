@@ -8,8 +8,12 @@ import google.generativeai as genai
 load_dotenv()
 app = Flask(__name__)
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.5-flash")
+# 환경변수 로드
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel(GEMINI_MODEL)
 
 SYSTEM_INSTRUCTION = """너는 정확하고 깊이 있는 성경 신학 해설가이다.
 
@@ -163,132 +167,5 @@ def markdown_bullets_to_html(text: str) -> str:
 
 def sanitize_section_html(body: str) -> str:
     body = body.strip()
-    body = re.sub(r"^```(?:html)?\s*", "", body, flags=re.I)
-    body = re.sub(r"\s*```$", "", body)
-    if "<" not in body and re.search(r"^[\-\*•]\s", body, re.M):
-        body = markdown_bullets_to_html(body)
-    cleaned = bleach.clean(
-        body,
-        tags=ALLOWED_TAGS,
-        attributes=ALLOWED_ATTRS,
-        strip=True,
-    )
-    if "<table" in cleaned and "table-wrap" not in cleaned:
-        cleaned = f'<div class="table-wrap">{cleaned}</div>'
-    return cleaned.strip()
-
-
-def find_section_starts(text: str) -> list[tuple[int, int, dict]]:
-    matches = []
-    for section in SECTION_DEFS:
-        best = None
-        for pattern in section["patterns"]:
-            m = re.search(pattern, text, re.I)
-            if m and (best is None or m.start() < best.start()):
-                best = m
-        if best:
-            matches.append((best.start(), best.end(), section))
-    matches.sort(key=lambda x: x[0])
-    return matches
-
-
-def parse_sections(text: str) -> list[dict]:
-    starts = find_section_starts(text)
-    if not starts:
-        return []
-
-    sections = []
-    for i, (start, end, section) in enumerate(starts):
-        body_end = starts[i + 1][0] if i + 1 < len(starts) else len(text)
-        body = text[end:body_end].strip()
-        if body:
-            sections.append({
-                "id": section["id"],
-                "emoji": section["emoji"],
-                "title": section["title"],
-                "html": sanitize_section_html(body),
-            })
-    return sections
-
-
-def get_model(max_output_tokens: int | None = None):
-    if not GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY가 설정되지 않았습니다.")
-    genai.configure(api_key=GEMINI_API_KEY)
-    config = {**GENERATION_CONFIG}
-    if max_output_tokens is not None:
-        config["max_output_tokens"] = max_output_tokens
-    return genai.GenerativeModel(
-        GEMINI_MODEL,
-        system_instruction=SYSTEM_INSTRUCTION,
-        generation_config=config,
-    )
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/get_summary', methods=['POST'])
-def get_summary():
-    data = request.get_json()
-    book = data.get('book')
-    chapter_num = data.get('chapter')
-    
-    if not book:
-        return jsonify({"error": "성경 권명이 필요합니다."}), 400
-
-    try:
-        chapter_num = int(chapter)
-    except (TypeError, ValueError):
-        return jsonify({"error": "유효한 장 번호가 필요합니다."}), 400
-
-    if chapter_num < 1:
-        return jsonify({"error": "유효한 장 번호가 필요합니다."}), 400
-
-    user_prompt = (
-        f"『{book}』 {chapter_num}장 전체를 깊이 있게 해설하라.\n"
-        f"4가지 제목(📝🌍💡📍)과 system instruction의 HTML 형식을 정확히 따르라.\n"
-        f"📝에는 <table> 표(날짜/순서·공간/장소·핵심 내용 등 열 구성), "
-        f"🌍와 💡와 📍에는 <ul><li> 상세 불릿 리스트를 사용하라.\n"
-        f"[필수] 모든 문장과 표·리스트 항목은 중간에 끊지 말고 마침표(.)로 완결하라."
-    )
-
- try:
-        # 아버님이 읽기 편한 HTML 구조로 요약 요청
-        prompt = f"성경 {book} {chapter_num}장의 내용을 아버님이 읽기 편하게 가독성이 좋은 HTML 태그(<p>, <ul>, <li> 등)나 표(<table>) 형식으로 작성해서 핵심 위주로 요약해줘."
-        response = model.generate_content(prompt)
-        text = response.text
-        sections = []
-
-        if is_response_truncated(response) or is_text_incomplete(text):
-            retry_prompt = (
-                user_prompt
-                + "\n이전 응답이 잘렸다. 4개 섹션을 처음부터 다시 작성하고, "
-                "특히 마지막 '📍 지역명&인물의 뜻'까지 모든 항목을 마침표(.)로 완결하라."
-            )
-            retry_model = get_model(max_output_tokens=4000)
-            response = retry_model.generate_content(retry_prompt)
-            text = extract_response_text(response)
-
-        if not text:
-            return jsonify({"error": "요약을 생성하지 못했습니다."}), 502
-
-        sections = parse_sections(text)
-        
-  return jsonify({
-            "summary": str(Markup(text)),
-            "sections": sections,
-            "book": book,
-            "chapter": chapter_num,
-        })
-
-   except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    xcept Exception as e:
-       
-        return jsonify({"error": str(e)}), 500
-
-
-if __name__ == '__main__':
-    app.run()
+    body = re.sub(r"^
+http://googleusercontent.com/immersive_entry_chip/0
