@@ -9,10 +9,8 @@ import google.generativeai as genai
 load_dotenv()
 app = Flask(__name__)
 
-# 환경변수 로드 및 글로벌 변수 선언
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(GEMINI_MODEL)
 
@@ -165,9 +163,40 @@ def markdown_bullets_to_html(text: str) -> str:
         html = f"<p>{' '.join(prose)}</p>" + html
     return html
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/get_summary', methods=['POST'])
+def get_summary():
+    data = request.json
+    book = data.get("book")
+    chapter = data.get("chapter")
+    prompt = f"『{book}』 {chapter}장의 내용을 4가지 항목(📝, 🌍, 💡, 📍)으로 깊이 있게 해설해줘."
+    response = model.generate_content(prompt)
+
+    # 결과 반환
+    return jsonify({"content": sanitize_section_html(response.text)})
 
 def sanitize_section_html(body: str) -> str:
     body = body.strip()
     body = re.sub(r'^\s*```html\s*', '', body, flags=re.I)
     body = re.sub(r'^\s*```\s*', '', body)
     body = re.sub(r'\s*```\s*$', '', body)
+    
+    if "<" not in body and re.search(r"^[\-\*•]\s", body, re.M):
+        body = markdown_bullets_to_html(body)
+        
+    cleaned = bleach.clean(
+        body,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRS,
+        strip=True,
+    )
+    
+    if "<table" in cleaned and "table-wrap" not in cleaned:
+        cleaned = f'<div class="table-wrap">{cleaned}</div>'
+    return cleaned.strip()
+
+if __name__ == '__main__':
+    app.run(debug=True)
