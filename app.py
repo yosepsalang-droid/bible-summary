@@ -167,4 +167,6 @@ def markdown_bullets_to_html(text: str) -> str:
 
 def sanitize_section_html(body: str) -> str:
     body = body.strip()
-    body = re.sub(r"^
+    body = re.sub(r'^\s*```html\s*', '', body, flags=re.I)
+    body = re.sub(r'^\s*```\s*', '', body)
+    body = re.sub(r'\s*```\s*$', '', body)
