@@ -5,12 +5,14 @@ from pathlib import Path
 
 import bleach
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, make_response, render_template, request
+from flask_compress import Compress
 import google.generativeai as genai
 
 load_dotenv()
 
 app = Flask(__name__)
+Compress(app)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
@@ -306,7 +308,10 @@ def cache_static(response):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # 첫 진입 체감속도 개선: HTML은 짧게 캐시(재방문 빠름)
+    resp = make_response(render_template("index.html"))
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    return resp
 
 
 @app.route("/api/summarize", methods=["POST"])
